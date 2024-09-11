@@ -1,118 +1,122 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect, useState } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import SplashScreen from './src/SplashScreen';
+import LoginScreen from './src/LoginScreen';
+import SignupScreen from './src/SignupScreen';
+import Profile from './src/Profile';
+import ChatScreen from './src/ChatScreen'; // Import your chat screens
+import ChatScreen2 from './src/ChatScreen';
+import ChatScreen3 from './src/ChatScreen';
+import ChatScreen4 from './src/ChatScreen';
+import { ProfileProvider } from './src/ProfileContext'; 
+import { createDrawerNavigator, DrawerNavigationProp } from '@react-navigation/drawer';
+import CustomDrawerContent from './src/CustomDrawerContent';
+import { Text, Button, View } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+// Define type for DrawerNavigator's navigation prop
+type DrawerParamList = {
+  Profile: undefined;
+  BNS: undefined;
+  BNSS: undefined;
+  BSB: undefined;
+  Counselling: undefined;
+  OnlineConsultation: undefined;
+  InPersonConsultation: undefined;
+  ChatScreen: undefined;
+  ChatScreen2: undefined;
+  ChatScreen3: undefined;
+  ChatScreen4: undefined;
+};
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+type DrawerScreenProps = DrawerNavigationProp<DrawerParamList>;
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+const Stack = createStackNavigator();
+const Drawer = createDrawerNavigator();
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+const DrawerNavigator = ({ navigation }: { navigation: DrawerScreenProps }) => (
+  <Drawer.Navigator
+    drawerContent={(props) => <CustomDrawerContent photoUri={null} {...props} />}
+  >
+    <Drawer.Screen name="Profile" component={Profile} />
+    <Drawer.Screen name="BNS" component={() => (
+      <View>
+        <Button title="Go to Chat Screen" onPress={() => navigation.navigate('ChatScreen')} />
+      </View>
+    )} />
+    <Drawer.Screen name="BNSS" component={() => (
+      <View>
+        <Button title="Go to Chat Screen 2" onPress={() => navigation.navigate('ChatScreen2')} />
+      </View>
+    )} />
+    <Drawer.Screen name="BSB" component={() => (
+      <View>
+        <Button title="Go to Chat Screen 3" onPress={() => navigation.navigate('ChatScreen3')} />
+      </View>
+    )} />
+    <Drawer.Screen name="Counselling" component={() => (
+      <View>
+        <Button title="Go to Chat Screen 4" onPress={() => navigation.navigate('ChatScreen4')} />
+      </View>
+    )} />
+    <Drawer.Screen name="Online Consultation" component={() => (
+      <View>
+        <Button title="Go to Chat Screen 5" onPress={() => navigation.navigate('ChatScreen')} />
+      </View>
+    )} />
+    <Drawer.Screen name="In Person Consultation" component={() => (
+      <View>
+        <Button title="Go to Chat Screen 6" onPress={() => navigation.navigate('ChatScreen')} />
+      </View>
+    )} />
+    <Drawer.Screen name="ChatScreen" component={ChatScreen} />
+    <Drawer.Screen name="ChatScreen2" component={ChatScreen2} />
+    <Drawer.Screen name="ChatScreen3" component={ChatScreen3} />
+    <Drawer.Screen name="ChatScreen4" component={ChatScreen4} />
+  </Drawer.Navigator>
+);
+
+const App = () => {
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        setIsLoggedIn(!!token);
+      } catch (error) {
+        console.error('Error checking login status:', error);
+        setIsLoggedIn(false);
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  if (isLoggedIn === null) {
+    return null; // or a loading spinner
+  }
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ProfileProvider>
+        <NavigationContainer>
+          <Stack.Navigator initialRouteName={isLoggedIn ? "Profile" : "Splash"}>
+            <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
+            <Stack.Screen
+              name="Profile"
+              component={DrawerNavigator}
+              options={{ headerShown: false }}
+            />
+          </Stack.Navigator>
+        </NavigationContainer>
+      </ProfileProvider>
+    </GestureHandlerRootView>
   );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+};
 
 export default App;

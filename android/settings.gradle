@@ -4,3 +4,13 @@ extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autoli
 rootProject.name = 'new_legal123'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')
+include ':react-native-reanimated'
+include ':react-native-gesture-handler'
+include ':react-native-screens'
+def reactNativeDir = new File(rootProject.projectDir, '../node_modules/react-native/android')
+include ':react-native'
+project(':react-native').projectDir = reactNativeDir
+
+// This line might be missing or incorrect
+include ':react-native-fbsdk'
+project(':react-native-fbsdk').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-fbsdk/android')
